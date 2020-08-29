@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/edit_profile.css' %}">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+{% block extra_head %}
+
+    <script>
+        function onFileSelected() {
+             
+            const preview = document.getElementById('myimg');
+            const file = document.querySelector('input[type=file]').files[0];
+            const reader = new FileReader();
+            console.log('first',preview.src)
+            reader.addEventListener("load", function () {
+                // convert image file to base64 string
+                preview.src = reader.result;
+            }, false);
+       
+            if (file) {
+                reader.readAsDataURL(file);
+                
+            }
+       
+        }
+
+        var check = function() {
+          
+          if (document.getElementById('password').value ==
+            document.getElementById('confirm').value) {
+            document.getElementById('message').style.color = 'green';
+            document.getElementById('message').innerHTML = 'Match';
+            document.getElementById('submit').disabled = false;
+          } else {
+            document.getElementById('message').style.color = 'red';
+            document.getElementById('message').innerHTML = 'Does not match';
+            document.getElementById('submit').disabled = true;
+          }
+        }
+
+        $('#password, #confirm').on('keyup', function () {
+          if ($('#password').val() == $('#confirm').val()) {
+            $('#message').html('Matching').css('color', 'green');
+          } else 
+            $('#message').html('Not Matching').css('color', 'red');
+        });
+        
+
+    </script>
+{% endblock extra_head %}
+<div class="container">
+<div class="row flex-lg-nowrap">
+ 
+
+  <div class="col">
+    <div class="row">
+      <div class="col mb-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="e-profile">
+              <form class="form" method="POST" enctype="multipart/form-data">
+              <div class="row">
+                <div class="col-12 col-sm-auto mb-3">
+                  <div class="mx-auto" style="width: 140px;">
+                    <br />
+                    <div class="d-flex justify-content-center align-items-center rounded" style="height: 140px; background-color: rgb(233, 236, 239);">
+                      {% if profile.profile_pic %}
+                      <img src="{{ profile.profile_pic.url }}" id="myimg" width="140px" alt="">
+
+                      {% else %}
+                      <img src="{% static 'images/user.jpg' %}" id="myimg" width="140px">
+                      {% endif%}
+                        <!-- <span style="color: rgb(166, 168, 170); font: bold 8pt Arial;">140x140</span> -->
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col d-flex flex-column flex-sm-row justify-content-between mb-3">
+                  <div class="text-center text-sm-left mb-2 mb-sm-0">
+                    <h4 class="pt-sm-2 pb-1 mb-0 text-nowrap">{{profile.first_name}}</h4>
+                    <p class="mb-0">@{{profile.user.username}}</p>
+                    <!-- <div class="text-muted"><small>Last seen 2 hours ago</small></div> -->
+                    <div class="mt-2">
+                        
+                        <i class="fa fa-fw fa-camera"></i>
+                        <span>Change Photo </span>                                             
+                        <input type="file" id="photo" name="photo" onchange="onFileSelected()" accept="image/*">
+                    </div>
+                  </div>
+                  <div class="text-center text-sm-right">
+                    
+                    <div class="text-muted"><small>Joined {{profile.created_date}}</small></div>
+                  </div>
+                </div>
+              </div>
+              <br />
+              <ul class="nav nav-tabs">
+                <li class="nav-item"><a href="" class="active nav-link">Settings</a></li>
+              </ul>
+              <div class="tab-content pt-3">
+                <div class="tab-pane active">
+                  
+                    {% csrf_token %}
+                    <div class="row">
+                      <div class="col">
+                        <div class="row">
+                          <div class="col">
+                            <div class="form-group">
+                              <label>First Name</label>
+                              <input class="form-control" type="text" name="fname" value="{{profile.first_name}}" required>
+                            </div>
+                          </div>
+                          <div class="col">
+                            <div class="form-group">
+                              <label>Last Name</label>
+                              <input class="form-control" type="text" name="lname" value="{{profile.last_name}}" required>
+                            </div>
+                          </div>
+                          <div class="col">
+                            <div class="form-group">
+                              <label>Username</label>
+                              <input class="form-control" type="text" name="username" value="{{profile.user.username}}" required>
+                            </div>
+                          </div>
+                        </div>
+                         
+                        <div class="row">
+                          <div class="col">
+                            <div class="form-group">
+                              <label>Email</label>
+                              <input class="form-control" type="text" name="email" placeholder="user@example.com" readonly>
+                            </div>
+                          </div>
+                        </div>
+                      
+                        <div class="row">
+                          <div class="col mb-3">
+                            <div class="form-group">
+                              <label>Bio</label>
+                              <textarea class="form-control" name = "bio" rows="5" placeholder="My Bio">{{profile.bio}}</textarea>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-12 col-sm-6 mb-3">
+                        <div class="mb-2"><b>Change Password</b></div>
+                        
+                        <div class="row">
+                          <div class="col">
+                            <div class="form-group">
+                              <label>New Password</label>
+                              <input class="form-control" type="password" id="password" name="password" onkeyup='check();' placeholder="••••••">
+                              <span id='message'></span>
+                              <div ng-style="passwordStrength"></div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col">
+                            <div class="form-group">
+                              <label>Confirm <span class="d-none d-xl-inline">Password</span></label>
+                              <input class="form-control" type="password"id="confirm" name="confirm" onkeyup='check();' placeholder="••••••"></div>
+                              <span id='message'></span>
+                              <div ng-style="passwordStrength"></div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                    </div>
+                    <div class="row">
+                      <div class="col d-flex justify-content-end">
+                        <button class="btn btn-primary" id="submit" type="submit">Save Changes</button>
+                      </div>
+                    </div>
+                  </form>                
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="col-12 col-md-3 mb-3">
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="px-xl-3">
+              <button class="btn btn-block btn-secondary">
+                <i class="fa fa-sign-out"></i>
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+      </div> -->
+    </div>
+
+  </div>
+</div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+{% endblock %}

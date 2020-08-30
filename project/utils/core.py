@@ -10,7 +10,7 @@ def get_object_by_id(instance, id):
     return obj
 
 def get_object_by_user(instance, user):
-     
+    
     try:
         obj = instance.objects.get(user = user)
          
@@ -28,14 +28,22 @@ def get_object_by_username(instance, username):
     return obj
 
 
-def get_count_object(instance, attribute_name):
-
+def get_count_object(instance, profile):
     try:
-        queryset = instance.objects.annotate(num_ = Count(attribute_name))
+        following = instance.objects.get(user=profile)
+        following = following.following.count()
+        
+    except ObjectDoesNotExist:
+        following = 0
+    
+    return following
 
-        return queryset[0].num_
-    except IndexError:
-        return 0
+    # try:
+    #     queryset = instance.objects.annotate(num_ = Count(attribute_name))
+
+    #     return queryset[0].num_
+    # except IndexError:
+    #     return 0
     
 def get_object_by_slug(instance, slug):
     try:

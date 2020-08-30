@@ -20,71 +20,80 @@
         <div class="w3-card-6" style="width:56%">
 
             <div class="container">
-                 
-                {% if all_posts %} {% for collins in all_posts %}
-
-                <div class="imagepadding">
-
-                    <!-- BootStrap Class For adding Border arround picture -->
-                    <div class="panel panel-primary">
-
-                        <!-- SECTION 1 PROFILE & user name -->
-
-                        <!-- Profile Picture and User name for account -->
+         
+                {% if all_posts %} 
+                    {% for collins in all_posts %}
+                   
+                    <div class="imagepadding">
                         
-                        <p class="usernamehome-dp">
+
+                        <!-- BootStrap Class For adding Border arround picture -->
+                        <div class="panel panel-primary">
+
+                            <!-- SECTION 1 PROFILE & user name -->
+
+                            <!-- Profile Picture and User name for account -->
+                            {% if all_users %}
+
+                            <p class="usernamehome-dp">
+                                
+                                {% if collins.user.profile_pic %}
+                                <img src="{{ collins.user.profile_pic.url }}" width="30px" class="circlehome-dp" alt="signuplogo ">
+
+                                {% endif %}
+                                <strong> <a href="{{ user.get_absolut_url }}">{{collins.user.user}}</a>  </strong>
+                            </p>
+
+                            <img src="{{ collins.image.url }}" class="img-responsive" style="width:100%;margin-left: 0%;margin-top:15px; height:600px; ">
                             
-                         {% if all_users %} {% for user in all_users %}
-                         {% if user.profile_pic %}
-                            <img src="{{ user.profile_pic.url }}" width="30px" class="circlehome-dp" alt="signuplogo ">
+                            <div class="container">
+                                <div class='likesect'>
 
-                         {% endif %}
-                            <strong> <a href="{{ user.get_absolut_url }}">{{user.user}}</a>  </strong>
-                        {% endfor %}{% else %}
-                        <strong>grammer</strong>
+                                    <span class="like-row">
+                                        {% if liked %}
+                                        <img class="likedhrt" src="{% static 'images/liked.png' %}" alt="liked picture"class="img-responsive"> {% else %}
+                                        <img class="likehrt" src="{% static 'images/liked.png' %}" alt="not likedpicture" class="img-responsive"> {% endif %}
+                                        <img class="commenthrt" id='comment-icon' src="../../static/images/comment.png"class="img-responsive" alt=" commentImage">
+                                        <img class="savehrt" src="{% static 'images/unsaved.png' %}" alt="save picture">
+                                            
+                                        </p>
+                                    </span>
+                                    <p><strong>5 likes</strong> </p>
+                                    <!-- Caption Section -->
+                                    {% if all_users %} {% for user in all_users %}
+                                    <strong> {{user.user}} </strong>
+                                    {% endfor %}{% else %}
+                                    <p><strong>grammer</strong> {{collins.image_caption}}</p>
+                                    
+                                    {% endif %} 
 
-                        {% endif %}
-                        </p>
-                       
-                        <!-- SECTION 2 (IMAGE) -->
-                        <!-- POSTED IMAGE -->
+                                    <div class='commentsection'>
+                                        <input type='text' id='cmnt' placeholder='Add a comment...'>
+                                        <span class='dot02'></span>
+                                    </div>
+                                </div>
+                            </div>  
+                            
+                            <!-- SECTION 2 (IMAGE) -->
+                            <!-- POSTED IMAGE -->
+                            
+                           
+                            
+                            <!--Like & Comment Section -->
+                            
+
+                             
+                            {% else %}
+                            <p class="usernamehome-dp">
+                            <strong>grammer</strong>
+                            </p>
+                            {% endif %}           
                         
-                        <img src="{{ collins.image.url }}" class="img-responsive" style="width:100%;margin-left: 0%;margin-top:15px; ">
-                        
-                        <!--Like & Comment Section -->
-                        <div class="container">
-                            <div class='likesect'>
-
-                                <span class="like-row">
-                                    {% if liked %}
-                                    <img class="likedhrt" src="{% static 'images/liked.png' %}" alt="liked picture"class="img-responsive"> {% else %}
-                                    <img class="likehrt" src="{% static 'images/liked.png' %}" alt="not likedpicture" class="img-responsive"> {% endif %}
-                                    <img class="commenthrt" id='comment-icon' src="../../static/images/comment.png"class="img-responsive" alt=" commentImage">
-                                    <img class="savehrt" src="{% static 'images/unsaved.png' %}" alt="save picture">
-                                        
-                                    </p>
-                                </span>
-                                <p><strong>5 likes</strong> </p>
-                        <!-- Caption Section -->
-                        {% if all_users %} {% for user in all_users %}
-                        <strong> {{user.user}} </strong>
-                        {% endfor %}{% else %}
-                        <p><strong>grammer</strong> {{collins.image_caption}}</p>
-                        
-                        {% endif %} 
-
-                        <div class='commentsection'>
-                            <input type='text' id='cmnt' placeholder='Add a comment...'>
-                            <span class='dot02'></span>
-                        </div>
-                            </div>
                         </div>
 
                     </div>
-
-
-                </div>
-                {% endfor %} {% else%}
+                    {% endfor %} 
+                {% else%}
                 <h3>You have no images</h3>
 
                 {% endif %}

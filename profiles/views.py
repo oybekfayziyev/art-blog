@@ -28,8 +28,9 @@ class ProfileView(View):
         profile = self.get_queryset(*args, **kwargs)   
         if profile is not None:     
             post = self.get_post()
-
-            following = self.get_following_count()
+            print('profile',profile)
+            following = self.get_following_count(profile)
+            print('profile following',following)
             context['profile'] = profile
             context['posts'] = post
             context['following'] = following
@@ -51,9 +52,9 @@ class ProfileView(View):
 
         return post
     
-    def get_following_count(self):
+    def get_following_count(self, profile):
         
-        count = get_count_object(Following, 'following')
+        count = get_count_object(Following, profile)
         return count
     
 

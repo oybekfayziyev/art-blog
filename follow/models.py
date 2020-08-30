@@ -6,16 +6,14 @@ from django.utils import timezone
 
 class Follower(models.Model):
     
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    user = models.OneToOneField(Profile, on_delete=models.CASCADE, unique=True)
     followers = models.ManyToManyField(Profile, related_name='followers')
     accepted = models.BooleanField(default = False)
     created_date = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_date = models.DateTimeField(auto_now=True, blank=True, null=True)
 
     def update(self, instance, follower):
-        print('AAAAAAA: follower',follower)
-        print(instance)
-        print('follower update')
+      
         instance.updated_date = timezone.now()
         instance.followers.add(follower)        
         instance.save()
@@ -23,8 +21,7 @@ class Follower(models.Model):
         return instance
 
     def create(self, instance, user, follower):
-        print('follower user ',user)
-        print('follower follower', follower)
+       
         follower_obj = instance.objects.create(
             user = user,
             created_date = timezone.now()
@@ -44,7 +41,7 @@ class Follower(models.Model):
 
 class Following(models.Model):
 
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='following_user')
+    user = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name='following_user')
     following = models.ManyToManyField(Profile, related_name='following')
 
     created_date = models.DateTimeField(auto_now_add=True, blank=True,null=True)
@@ -54,12 +51,11 @@ class Following(models.Model):
         return self.user.user.username
 
     def update(self,instance,follower):
-        print('instance',instance)
-        print('follower',follower)
+        
         instance.updated_date = timezone.now()
         instance.following.add(follower)     
         instance.save()
-        print('instance save',instance)
+       
         return instance
 
     def create(self,instance,user,follower):

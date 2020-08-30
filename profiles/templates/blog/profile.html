@@ -24,15 +24,13 @@
 				<button class="btn profile-settings-btn" aria-label="profile settings"><i class="fas fa-cog" aria-hidden="true"></i></button>
 
 			</div>
-
-			<div class="profile-stats">
-        
+			{{following.user.user.following.count}}
+			<div class="profile-stats">        
 				<ul>
 					<li><span class="profile-stat-count">{{ profile.post.count }}</span> posts</li>
-					<a href="{% url 'follow:followers' username=profile.user.username %}"><li><span class="profile-stat-count"> {{profile.followers.count }}</span> followers</li></a>
-					<li><span class="profile-stat-count">{{ following }}</span> following</li>
+					<a href="{% url 'follow:followers' username=profile.user.username %}"><li style="padding: 5px;"><span class="profile-stat-count"> {{profile.followers.count }}</span> followers</li></a>
+					<a href="{% url 'follow:followings' username=profile.user.username %}"><li><span class="profile-stat-count">{{ following }}</span> following</li></a>
 				</ul>
-
 			</div>
 
 			<div class="profile-bio">

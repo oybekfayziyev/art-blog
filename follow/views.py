@@ -12,14 +12,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 
 
-
-class FollowersView(LoginRequiredMixin, View):
-
+class FollowersViews(LoginRequiredMixin, View):
+    
     def get_queryset(self, *args, **kwargs):         
         username = self.kwargs.get('username')   
-        print('username',username)
+        
         profile = get_object_by_username(Profile, username)
-        print('profile',profile.followers.all())
        
         return profile
 
@@ -28,42 +26,79 @@ class FollowersView(LoginRequiredMixin, View):
         username = self.kwargs.get('username')
         profile = self.get_queryset()
               
-        followers = profile.followers.all()
+        follower = profile.followers.all()
         following = get_object_by_user(Following, profile)
-        print('followers',followers)
+        print('follower',follower)
         print('following', following)
-        if followers:
-            context['profile'] = profile
-            context['following'] = following 
-            context['followers'] = followers           
-            
-            return render(request, 'blog/followings.html', context)
         
-       
+        if follower:
+            context['profile'] = profile
+            context['following'] = following                      
+            
+            return render(request, 'blog/followers.html', context)
+               
         return HttpResponse('You dont have followers')
 
+class FollowingViews(LoginRequiredMixin, View):
+
+    def get_queryset(self, *args, **kwargs):         
+        username = self.kwargs.get('username')   
+        
+        profile = get_object_by_username(Profile, username)
+       
+        return profile
+
+    def get(self, request, *args, **kwargs):
+        context = {}
+        username = self.kwargs.get('username')
+        profile = self.get_queryset()
+        
+        print('profile',profile)
+                
+        following = get_object_by_user(Following, profile)
+        print('following',following)
+        
+        if following:
+            context['profile'] = profile
+            context['following'] = following                      
+            
+            return render(request, 'blog/followings.html', context)        
+       
+        return HttpResponse('You dont have followings')
+
+def follow_unfollow_followings(request, username, follow):
+
+    following, _ = follow_unfollow_user(request, username, follow)
+    return redirect("/follow/{}/followings/".format(username)) 
+
+def follow_unfollow_followers(request, username, follow):
+  
+    _, followers = follow_unfollow_user(request, username, follow)
+  
+    return redirect("/follow/{}/followers/".format(username)) 
+
 def follow_unfollow_user(request, username, follow):
-    
-    follower, following, profile_following = get_object(username,follow)
+    print('follow unfollow ',username)
+    print(follow)
+    follower, following, profile_following, profile_follower = get_object(username,follow)
     print('follower',follower)
+    print('profile following',profile_following)
     print('following',following)
     if following:
-        for follow_to in following.following.all():
-            print('follow_to', follow_to)
-            if follow_to.user.username != follow:
-                if not follower:
-                    follower = Follower().create(Follower, follow_to.user.profile, profile_following)
-                else:
-                    follower = follower.update(follower, profile_following)
-                print('follower',follower)
-                following.update(following, follower)
-                print('yes')
-                print('followerssssss',follower)                   
-            
+
+        is_following_exist = is_following_user_exist(following.following.all(), follow)
+        print('is exist',is_following_exist)
+        if is_following_exist:
+            following.remove(following, profile_follower)
+        else:
+            if not follower:
+                print('not follower')
+                Follower().create(Follower, profile_follower, profile_following)
             else:
-                print('noooo')
-                following.remove(following, follow_to)
-                
+                print('follower')
+                follower.update(follower, profile_following)
+            print('follower',follower)
+            following.update(following, profile_follower)                
     else:
         profile_follow, profile = get_queryset(username, follow)
         Following().create(Following, profile, profile_follow)
@@ -72,25 +107,27 @@ def follow_unfollow_user(request, username, follow):
         else:
             Follower().create(Follower, profile_follow, profile)
 
-    return HttpResponse('Yeees')
+    return following, follower
 
+def is_following_user_exist(following_user, user):
+    for following in following_user:       
+        if following.user.username==user:
+            return True
     
-    
-    return HttpResponse('User not found')
+    return False
 
 
 def get_queryset(username, follow):
     profile = get_object_by_username(Profile, username)
-    print('profile',profile)
+  
     profile_follow = get_object_by_username(Profile, follow)  
-    print('profile follow',profile_follow)
-
+    
     return profile_follow, profile
 
 def get_object(username,follow): 
     profile_follower, profile_following = get_queryset(username, follow)
     _follow = get_object_by_user(Following, profile_following)
-    print('follow',_follow)
+     
     follower = get_object_by_user(Follower, profile_follower)
-    print('finished', follower)
-    return follower, _follow, profile_following
+   
+    return follower, _follow, profile_following, profile_follower

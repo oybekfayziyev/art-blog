@@ -49,14 +49,12 @@ def get_absolute_uri(self,post):
 
 
 def is_valid(args={}, username=None, current_username=None):
-    print(args['username'])
+    
     is_user_exist = True
     for user in username:
         if user != args['username'] and args['username'] != current_username:
             is_user_exist = False
-        
-     
-    print('username',username)
+      
     if args['password'] == args['confirm'] and is_user_exist:       
         return True
      

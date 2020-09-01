@@ -18,22 +18,25 @@ class FollowersViews(LoginRequiredMixin, View):
         username = self.kwargs.get('username')   
         
         profile = get_object_by_username(Profile, username)
-       
-        return profile
+        follower = get_object_by_user(Follower, profile)
+        return profile, follower
 
     def get(self, request, *args, **kwargs):
         context = {}
-        username = self.kwargs.get('username')
-        profile = self.get_queryset()
-              
-        follower = profile.followers.all()
-        following = get_object_by_user(Following, profile)
-        print('follower',follower)
-        print('following', following)
         
-        if follower:
+        profile, followers = self.get_queryset()
+        print('profile follower',profile)
+              
+        # follower = profile.followers.all()
+        print('PRINT',request.user.profile)
+        following = get_object_by_user(Following, request.user.profile)
+        print('request',request.user)
+        print('FOLLOWING', following)
+        
+        if followers:
             context['profile'] = profile
-            context['following'] = following                      
+            context['following'] = following  
+            context['followers'] = followers                    
             
             return render(request, 'blog/followers.html', context)
                
@@ -52,12 +55,10 @@ class FollowingViews(LoginRequiredMixin, View):
         context = {}
         username = self.kwargs.get('username')
         profile = self.get_queryset()
-        
-        print('profile',profile)
-                
+          
         following = get_object_by_user(Following, profile)
-        print('following',following)
         
+        # print('followingssss', following.following.all())
         if following:
             context['profile'] = profile
             context['following'] = following                      
@@ -77,6 +78,7 @@ def follow_unfollow_followers(request, username, follow):
   
     return redirect("/follow/{}/followers/".format(username)) 
 
+@login_required
 def follow_unfollow_user(request, username, follow):
     print('follow unfollow ',username)
     print(follow)
@@ -90,6 +92,7 @@ def follow_unfollow_user(request, username, follow):
         print('is exist',is_following_exist)
         if is_following_exist:
             following.remove(following, profile_follower)
+            follower.remove(follower, profile_following)
         else:
             if not follower:
                 print('not follower')
@@ -118,6 +121,7 @@ def is_following_user_exist(following_user, user):
 
 
 def get_queryset(username, follow):
+    
     profile = get_object_by_username(Profile, username)
   
     profile_follow = get_object_by_username(Profile, follow)  
@@ -125,6 +129,7 @@ def get_queryset(username, follow):
     return profile_follow, profile
 
 def get_object(username,follow): 
+
     profile_follower, profile_following = get_queryset(username, follow)
     _follow = get_object_by_user(Following, profile_following)
      

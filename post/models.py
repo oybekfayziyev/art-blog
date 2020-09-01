@@ -28,7 +28,7 @@ class Post(models.Model):
     update_date = models.DateField(auto_now=True)
     
     def __str__(self):
-        return self.user.first_name
+        return self.slug
     
     def get_absolut_url(self):
         return reverse("profile:user", kwargs={

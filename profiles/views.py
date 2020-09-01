@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView, ListView, DetailView
-from project.utils.core import get_object_by_username, get_count_object, get_all_objects
+from project.utils.core import get_object_by_username, get_count_object, get_all_objects, get_object_by_user
 from django.views import View
 from profiles.models import Profile
 from post.models import Post
@@ -11,10 +11,12 @@ from follow.models import Follower, Following
 from project.utils.utils import is_valid
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from .forms import ProfileForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.utils import timezone
+from allauth.account.views import LoginView, SignupView
+from .forms import LoginForm, UserForm, ProfileForm
+
 # Create your views here.
 
 @method_decorator(login_required, name='dispatch')
@@ -25,7 +27,7 @@ class ProfileView(View):
 
         context = {}
 
-        profile = self.get_queryset(*args, **kwargs)   
+        profile, following, follower = self.get_queryset(*args, **kwargs)   
         if profile is not None:     
             post = self.get_post()
             print('profile',profile)
@@ -43,11 +45,13 @@ class ProfileView(View):
     def get_queryset(self, *args, **kwargs):
         username = self.kwargs.get('username')   
         profile = get_object_by_username(Profile, username = username)
-       
-        return profile
+        following = get_object_by_user(Following, profile)
+        follower = get_object_by_user(Follower, profile)
+        
+        return profile, following, follower
     
     def get_post(self):
-        profile = self.get_queryset()        
+        profile, _, _ = self.get_queryset()        
         post = Post.objects.filter(user = profile)
 
         return post
@@ -127,3 +131,56 @@ class EditProfile(LoginRequiredMixin,View):
             }
     
 
+
+class MyLoginView(LoginView):
+    
+
+    def get_context_data(self, **kwargs):           
+        context = super(MyLoginView, self).get_context_data(**kwargs)
+        context['form'] = LoginForm() # add form to context
+        
+        print(context)
+        return context
+    
+    # def form_valid(self, form):
+    #     # By assigning the User to a property on the view, we allow subclasses
+    #     # of SignupView to access the newly created User instance
+    #     print('retaurant',self.restaurant_form)   
+    #     print('retaurant',form)   
+    #     self.restaurant_form = form.save(self.request)   
+    #     print('retaurant',self.restaurant_form)      
+    #     return complete_signup(
+    #         self.request, self.user,
+    #         app_settings.EMAIL_VERIFICATION,
+    #         self.get_success_url())
+    
+class MySignupView(SignupView):    
+
+    def get_context_data(self, **kwargs):           
+        context = super(MySignupView, self).get_context_data(**kwargs)
+         
+        context['form'] = UserForm() # add form to context
+        context['profile_form'] = ProfileForm()
+
+        print('kwargs')
+        print(' dxxxx',context)
+        return context
+    
+    def form_valid(self, form, profile_form):
+        # By assigning the User to a property on the view, we allow subclasses
+        # of SignupView to access the newly created User instance
+        self.user = form.save(self.request)
+
+        print('form')
+        print('profile form')
+
+
+        try:
+            return complete_signup(
+                self.request, self.user,
+                app_settings.EMAIL_VERIFICATION,
+                self.get_success_url())
+        except ImmediateHttpResponse as e:
+            return e.response
+
+   

@@ -52,5 +52,13 @@ def get_object_by_slug(instance, slug):
         obj = None
     return obj
 
+def get_object_by_post(instance, post):
+    try:
+        obj = instance.objects.get(post = post)
+    except ObjectDoesNotExist:
+        obj = None
+    return obj
+
+
 def get_all_objects(instance):
     return instance.objects.all()

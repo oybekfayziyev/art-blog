@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<script>
+$('[data-toggle="collapse"]').on('click', function() {
+    var $this = $(this),
+            $parent = typeof $this.data('parent')!== 'undefined' ? $($this.data('parent')) : undefined;
+    if($parent === undefined) { /* Just toggle my  */
+        $this.find('.glyphicon').toggleClass('glyphicon-plus glyphicon-minus');
+        return true;
+    }
+
+    /* Open element will be close if parent !== undefined */
+    var currentIcon = $this.find('.glyphicon');
+    currentIcon.toggleClass('glyphicon-plus glyphicon-minus');
+    $parent.find('.glyphicon').not(currentIcon).removeClass('glyphicon-minus').addClass('glyphicon-plus');
+
+});
+
+</script>
+{% endblock %}
+{% block content %}
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+<!--
+Author : Maniruzzaman Akash
+Email  : manirujjamanakash@gmail.com
+-->
+
+<!--To Work with icons-->
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+<div class="container">
+    <!-- <h2 class="text-center">{{post.description}}</h2> -->
+    
+    <form method="POST" style="padding:50px;">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="comment" style="font-size:20px;">Your Comment</label>
+          <input type="text" style="display: none;" value="{{post.slug}}" name="post">
+          <textarea name="description" style="font-size:20px;" class="form-control" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="font-size:20px; float:right;">Send</button>
+    </form>
+    <br />
+
+	<div class="card">
+	    <div class="card-body">
+	        <div class="row">
+                {% for comment in comments %}
+        	    <div class="col-md-2">
+                    {% if comment.user.profile_pic %}
+                    <img src="{{ comment.user.profile_pic.url }}" class="img img-rounded" height="100px"/>
+                    {% else %}
+                    <img src="https://image.ibb.co/jw55Ex/def_face.jpg" class="img img-rounded" height="100px"/>
+                    {% endif %}
+        	        <p class="text-secondary">{{comment.created_date}}</p>
+        	    </div>
+        	    <div class="col-md-10">
+        	        <p>
+                        <a class="float-left" href="{% url 'profile:profile' username=comment.user %}">
+                            <strong style="font-size: 15px;">{{comment.user}}</strong></a>
+        	            <!-- <span class="float-right"><i class="text-warning fa fa-star"></i></span>
+                        <span class="float-right"><i class="text-warning fa fa-star"></i></span>
+        	            <span class="float-right"><i class="text-warning fa fa-star"></i></span>
+        	            <span class="float-right"><i class="text-warning fa fa-star"></i></span> -->
+
+        	       </p>
+        	       <div class="clearfix"></div>
+        	        <p style="font-size: 15px;">{{comment.comment}}</p>
+        	        <!-- <p>
+        	            <a class="float-right btn btn-outline-primary ml-2"> <i class="fa fa-reply"></i> Reply</a>
+        	            <a class="float-right btn text-white btn-danger"> <i class="fa fa-heart"></i> Like</a>
+        	       </p> -->
+                </div>
+                {% endfor %}
+	        </div>
+	        	
+	    </div>
+    </div>
+    
+</div>
+{% endblock %}

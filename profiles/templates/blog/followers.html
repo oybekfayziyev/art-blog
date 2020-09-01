@@ -1,7 +1,7 @@
-{% extends 'base.html' %}
-{% load template_tags %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 {% load static %}
 {% block content %}
+
 <div class="container mt-5">
     <div class="d-flex justify-content-center row">
         <div class="col-md-6">
@@ -12,28 +12,32 @@
                 <br />
                 <br />
                 
-                {% for user in profile.followers.all %}   
-                
+                {% for follower in followers.followers.all %}  
+              
                 <div class="d-flex flex-row justify-content-between align-items-center">
                     <div class="d-flex flex-row align-items-center">
-                        {% if user.user.profile_pic %}
-                        <img class="rounded-circle" src="{{ user.user.profile_pic.url }}" width="55">
+                         
+                        {% if follower.user.profile.profile_pic %}
+                        <img class="rounded-circle" src="{{ follower.user.profile.profile_pic.url }}" width="55">
                         {% else %}
-                        <img class="rounded-circle" src="{% static 'images/user.jpg' %}" width="55">                        
+                        <img class="rounded-circle" src="{% static 'img/user.png' %}" width="55">                        
                         {% endif %}
                         
-                        <div class="d-flex flex-column align-items-start ml-2"><span class="font-weight-bold"><a href="{{ user.user.get_absolute_url }}">{{ user }}</a></span><span class="followers">{{user.followers.count}} Followers</span></div>
+                        <div class="d-flex flex-column align-items-start ml-2"><span class="font-weight-bold"><a href="{{ follower.user.profile.get_absolute_url }}">{{ follower }}</a>
+                        </span><span class="followers">{{follower.followers.count}} Followers</span></div>
                     </div>                     
-
+                       
                         <div class="d-flex flex-row align-items-center mt-2">      
-                            {% if user.user in following.following.all %}
-                            <a href="{% url 'follow:follower_to' username=profile.user.username follow=user.user %}">
+                            {% if follower in following.following.all %}
+                            
+                            <a href="{% url 'follow:follower_to' username=user.username follow=follower.user.profile.user %}">
                             <button class="btn btn-outline-primary btn-sm" type="button">
                                 Following
                             </button>
                             </a>  
                             {% else %}
-                            <a href="{% url 'follow:follower_to' username=profile.user.username follow=user.user %}">
+                             
+                            <a href="{% url 'follow:follower_to' username=user.username follow=follower.user.profile.user %}">
                                 <button class="btn btn-primary btn-sm" type="button">
                                     Follow
                                 </button>

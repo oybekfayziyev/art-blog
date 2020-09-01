@@ -1,5 +1,7 @@
-
 from django import template
+from comment.models import Comment
+from project.utils.core import get_object_by_slug, get_object_by_user
+from post.models import Post
 
 register = template.Library()
 
@@ -14,3 +16,10 @@ def is_equal(value1, value2):
         return True
     
     return False
+
+@register.filter
+def get_comment_total(slug):
+    post = get_object_by_slug(Post, slug=slug)
+    comment = Comment.objects.filter(post = post)
+
+    return comment.count()

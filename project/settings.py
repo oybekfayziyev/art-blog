@@ -25,7 +25,7 @@ SECRET_KEY = 'mjz4gaiw_3a)72+rihoi8mk9nlw7)@i)$ih$*r=_h#ow0=s)nd'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['art-blog-python.herokuapp.com', '127.0.0.1']
 # 'djangoe-commercewebsite.herokuapp.com','127.0.0.1'
 
 # Application definition

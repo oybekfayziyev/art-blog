@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from .forms import PostForm
 from django.contrib import messages
-
+from django.utils import timezone
 # Create your views here.
 
 class PostView(LoginRequiredMixin, View):
@@ -21,16 +21,23 @@ class PostView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         post = Post()
-        # form = PostForm(request.POST, request.FILES)
-        user = self.get_queryset(request)
-        image = request.FILES.get('photo',)
-        
-        if image:
-            image = 'post/{}/{}'.format(user, image) 
-          
-        description = request.POST.get('description')
-        
-        post.create(Post, user, image, description)  
+        form = PostForm(request.POST, request.FILES)
+        print('form',form)
+        if form.is_valid():
+            print('valid true')
+            # image = request.FILES.get('photo',)
+            image = form.cleaned_data.get('image')
+            user = self.get_queryset(request)
+            description = form.cleaned_data.get('description')
+            post = Post(
+                user = user,
+                image = image,
+                description = description,
+                created_date = timezone.now()
+            )
+            post.save()
+             
+       
         messages.info(request, 'Post added successfully')      
         return redirect("/")
     

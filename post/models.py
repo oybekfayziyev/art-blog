@@ -39,15 +39,20 @@ class Post(models.Model):
     def create(self, instance, user, photo, description):
         
         obj = instance.objects.create(
-            user = user,                            
+            user = user,   
+            image = photo,                         
             description = description,
             created_date = timezone.now()
         )
 
-        if photo:            
-            photo = upload_directory_path(obj, photo) 
-            obj.image = photo
-            obj.save()
+        # if photo:            
+        #     photo = upload_directory_path(obj, photo) 
+        #     print('PHOTO', photo)
+        #     obj.image = photo
+        #     obj.save()
+            
+        #     f = file()
+            
                     
         # obj.image = ImageFile(photo)
         # obj.save()

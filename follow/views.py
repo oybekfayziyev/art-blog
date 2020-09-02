@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from project.utils.core import get_object_by_username, get_object_by_user
+from project.utils.core import get_object_by_username, get_object_by_user,is_blocked
 from django.views import View
 from profiles.models import Profile
 from django.utils.decorators import method_decorator
-from follow.models import Follower, Following
+from follow.models import Follower, Following, Blockuser
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -19,24 +19,20 @@ class FollowersViews(LoginRequiredMixin, View):
         
         profile = get_object_by_username(Profile, username)
         follower = get_object_by_user(Follower, profile)
-        return profile, follower
+        block = get_object_by_user(Blockuser, profile)
+        return profile, follower, block
 
     def get(self, request, *args, **kwargs):
         context = {}
         
-        profile, followers = self.get_queryset()
-        print('profile follower',profile)
-              
-        # follower = profile.followers.all()
-        print('PRINT',request.user.profile)
+        profile, followers, block = self.get_queryset()        
         following = get_object_by_user(Following, request.user.profile)
-        print('request',request.user)
-        print('FOLLOWING', following)
-        
+       
         if followers:
             context['profile'] = profile
             context['following'] = following  
-            context['followers'] = followers                    
+            context['followers'] = followers 
+            context['blockusers'] = block                     
             
             return render(request, 'blog/followers.html', context)
                
@@ -45,30 +41,35 @@ class FollowersViews(LoginRequiredMixin, View):
 class FollowingViews(LoginRequiredMixin, View):
 
     def get_queryset(self, *args, **kwargs):         
-        username = self.kwargs.get('username')   
-        
+        username = self.kwargs.get('username')
+             
         profile = get_object_by_username(Profile, username)
-       
-        return profile
+        block = get_object_by_user(Blockuser, profile)
+
+        return profile, block
 
     def get(self, request, *args, **kwargs):
         context = {}
         username = self.kwargs.get('username')
-        profile = self.get_queryset()
-          
-        following = get_object_by_user(Following, profile)
-        
-        # print('followingssss', following.following.all())
-        if following:
-            context['profile'] = profile
-            context['following'] = following                      
-            
-            return render(request, 'blog/followings.html', context)        
+        profile, block = self.get_queryset()
+        blocked = is_blocked(request.user.profile, block)
+
+        if blocked:
+            following = get_object_by_user(Following, profile)
+            if following:
+                context['profile'] = profile
+                context['following'] = following  
+                context['blockusers'] = block                   
+                
+                return render(request, 'blog/followings.html', context) 
+
+            return HttpResponse('You dont have followings')
+        return HttpResponse("You can not enter this profile. You are blocked")       
        
-        return HttpResponse('You dont have followings')
+        
 
 def follow_unfollow_followings(request, username, follow):
-
+    
     following, _ = follow_unfollow_user(request, username, follow)
     return redirect("/follow/{}/followings/".format(username)) 
 
@@ -80,27 +81,24 @@ def follow_unfollow_followers(request, username, follow):
 
 @login_required
 def follow_unfollow_user(request, username, follow):
-    print('follow unfollow ',username)
-    print(follow)
+    
     follower, following, profile_following, profile_follower = get_object(username,follow)
-    print('follower',follower)
-    print('profile following',profile_following)
-    print('following',following)
+   
     if following:
 
         is_following_exist = is_following_user_exist(following.following.all(), follow)
-        print('is exist',is_following_exist)
+        
         if is_following_exist:
             following.remove(following, profile_follower)
             follower.remove(follower, profile_following)
         else:
             if not follower:
-                print('not follower')
+                 
                 Follower().create(Follower, profile_follower, profile_following)
             else:
-                print('follower')
+                
                 follower.update(follower, profile_following)
-            print('follower',follower)
+           
             following.update(following, profile_follower)                
     else:
         profile_follow, profile = get_queryset(username, follow)
@@ -136,3 +134,26 @@ def get_object(username,follow):
     follower = get_object_by_user(Follower, profile_follower)
    
     return follower, _follow, profile_following, profile_follower
+
+@login_required
+def block_unlock_user(request, block_user):
+
+    user = request.user.profile
+    block_user = get_object_by_username(Profile, block_user)
+    print('user',user)
+    block_user_obj = get_object_by_user(Blockuser, user = user)
+    print('block user obj', block_user_obj)
+    if block_user_obj:
+        
+        if block_user in block_user_obj.blocked.all():
+            print('remove')
+            block_user_obj.remove(block_user_obj, block_user)
+        else:
+            print('update')
+            block_user_obj.update(block_user_obj, block_user)
+
+    else:
+        Blockuser().create(Blockuser, user, block_user)
+
+
+    return HttpResponse("Success")

@@ -1,6 +1,11 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView, ListView, DetailView
-from project.utils.core import get_object_by_username, get_count_object, get_all_objects, get_object_by_user
+from project.utils.core import (get_object_by_username, 
+                    get_count_object, 
+                    get_all_objects, 
+                    get_object_by_user,
+                    is_blocked
+                )
 from django.views import View
 from profiles.models import Profile
 from post.models import Post
@@ -16,42 +21,50 @@ from django.contrib import messages
 from django.utils import timezone
 from allauth.account.views import LoginView, SignupView
 from .forms import LoginForm, UserForm, ProfileForm
+from follow.models import Blockuser
 
 # Create your views here.
 
 @method_decorator(login_required, name='dispatch')
 class ProfileView(View):
        
-
     def get(self, request, *args, **kwargs):
 
         context = {}
 
-        profile, following, follower = self.get_queryset(*args, **kwargs)   
-        if profile is not None:     
-            post = self.get_post()
-            print('profile',profile)
-            following = self.get_following_count(profile)
-            print('profile following',following)
-            context['profile'] = profile
-            context['posts'] = post
-            context['following'] = following
+        profile, following, follower, block = self.get_queryset(request,*args, **kwargs)
+        blocked = is_blocked(request.user.profile, block)
+        
+        if blocked:
+       
+            if profile is not None:     
+                post = self.get_post(request).order_by('-id')
                 
+                following = self.get_following_count(profile)
+                followers = self.get_follower_count(follower)
+                context['profile'] = profile
+                context['posts'] = post
+                context['following'] = following
+                context['followers'] = followers
+                    
+                return render(request, 'blog/profile.html', context)
 
-            return render(request, 'blog/profile.html', context)
-
-        return HttpResponse('Profile not found 404 Error')
+            return HttpResponse('Profile not found 404 Error')
+        
+        return HttpResponse("You are blocked")
     
-    def get_queryset(self, *args, **kwargs):
+    def get_queryset(self, request, *args, **kwargs):
         username = self.kwargs.get('username')   
         profile = get_object_by_username(Profile, username = username)
+       
         following = get_object_by_user(Following, profile)
         follower = get_object_by_user(Follower, profile)
+        block = get_object_by_user(Blockuser, profile)
         
-        return profile, following, follower
+        return profile, following, follower, block
     
-    def get_post(self):
-        profile, _, _ = self.get_queryset()        
+    def get_post(self, request):
+        profile, _, _, _ = self.get_queryset(request)        
         post = Post.objects.filter(user = profile)
 
         return post
@@ -59,7 +72,15 @@ class ProfileView(View):
     def get_following_count(self, profile):
         
         count = get_count_object(Following, profile)
+        print('count',count)
         return count
+    
+    def get_follower_count(self, follower):
+        try:
+            followers = follower.followers.count()
+        except AttributeError:
+            followers = 0
+        return followers
     
 
 class EditProfile(LoginRequiredMixin,View):
@@ -69,21 +90,23 @@ class EditProfile(LoginRequiredMixin,View):
         username = self.kwargs.get('username')   
         profile = get_object_by_username(Profile, username = username)
        
-        return profile
+        return profile, username
        
     def get(self, request, *args, **kwargs):
 
-        profile = self.get_queryset(*args, **kwargs)   
+        profile, username = self.get_queryset(*args, **kwargs)   
         
         context = {}
        
-         
-        if profile is not None:   
-            context['profile'] = profile        
+        if request.user.username == username:
+            if profile is not None:   
+                context['profile'] = profile        
 
-            return render(request, 'blog/edit_profile.html', context)
+                return render(request, 'blog/edit_profile.html', context)
+            
+            return HttpResponse('User not Found 404 Error')
         
-        return HttpResponse('User not Found 404 Error')
+        return HttpResponse("You can not enter someone's profile settings!!!")
     
     def post(self, request, *args, **kwargs):
 

@@ -1,5 +1,7 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 {% load static %}
+
+{% load template_tags %}
 {% block content %}
 
 <div class="container mt-5">
@@ -24,24 +26,58 @@
                         {% endif %}
                         
                         <div class="d-flex flex-column align-items-start ml-2"><span class="font-weight-bold"><a href="{{ follower.user.profile.get_absolute_url }}">{{ follower }}</a>
-                        </span><span class="followers">{{follower.followers.count}} Followers</span></div>
+                        </span><span class="followers">{{follower.user|get_follower_total}} Followers</span></div>
                     </div>                     
                        
                         <div class="d-flex flex-row align-items-center mt-2">      
                             {% if follower in following.following.all %}
                             
-                            <a href="{% url 'follow:follower_to' username=user.username follow=follower.user.profile.user %}">
-                            <button class="btn btn-outline-primary btn-sm" type="button">
-                                Following
-                            </button>
-                            </a>  
+                                <a href="{% url 'follow:follower_to' username=user.username follow=follower.user.profile.user %}">
+                                <button class="btn btn-outline-primary btn-sm" type="button">
+                                    Following
+                                </button>
+                                </a>  
+                                {% if user.username|is_equal:profile.user.username %}
+                                    {% if follower in blockusers.blocked.all %}
+                                        <a href="{% url 'follow:block' block_user=follower.user %}">
+                                            <button class="btn btn-success btn-sm" style="margin: 10px;" type="button">
+                                                Unlock User
+                                            </button>
+                                        </a>
+
+                                        {% else %}
+
+                                        <a href="{% url 'follow:block' block_user=follower.user %}">
+                                            <button class="btn btn-danger btn-sm" style="margin: 10px;" type="button">
+                                                Block User
+                                            </button>
+                                        </a>
+                                    {% endif %}
+                                    
+                                {% endif %}
+
                             {% else %}
                              
-                            <a href="{% url 'follow:follower_to' username=user.username follow=follower.user.profile.user %}">
-                                <button class="btn btn-primary btn-sm" type="button">
-                                    Follow
-                                </button>
+                                <a href="{% url 'follow:follower_to' username=user.username follow=follower.user.profile.user %}">
+                                    <button class="btn btn-primary btn-sm" style="margin: 10px;" type="button">
+                                        Follow
+                                    </button>
                                 </a> 
+                                {% if user.username|is_equal:profile.user.username %}
+                                    {% if follower in blockusers.blocked.all %}
+                                        <a href="{% url 'follow:block' block_user=follower.user %}">
+                                            <button class="btn btn-success btn-sm" style="margin: 10px;" type="button">
+                                                Unlock User
+                                            </button>
+                                        </a>
+                                        {% else %}
+                                        <a href="{% url 'follow:block' block_user=follower.user %}">
+                                            <button class="btn btn-danger btn-sm" style="margin: 10px;" type="button">
+                                                Block User
+                                            </button>
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
                             {% endif %}                       
                         </div>                                       
                 </div>        

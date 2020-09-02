@@ -17,19 +17,17 @@
                 
                 <!-- top nav -->
                 <div class="navbar navbar-blue navbar-static-top">  
-                    <div class="navbar-header">
-                    
-                    
+                    <div class="navbar-header">                                        
                     </div>
                     <nav class="collapse navbar-collapse" role="navigation">
-                    <form class="navbar-form navbar-left">
+                    <!-- <form class="navbar-form navbar-left">
                         <div class="input-group input-group-sm" style="max-width:360px;">
                         <input class="form-control" placeholder="Search" name="srch-term" id="srch-term" type="text">
                         <div class="input-group-btn">
                             <button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
                         </div>
                         </div>
-                    </form>
+                    </form> -->
                     <ul class="nav navbar-nav">
                     <li>
                         <a href="{% url 'home' %}">
@@ -41,24 +39,34 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#postModal" role="button" data-toggle="modal"><i class="glyphicon glyphicon-plus"></i> Post</a>
+                        <a href="{% url 'post:post' %}">
+                            <i class="glyphicon glyphicon-plus"></i> Post</a>
                     </li>
                     
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown">
+                        
+                        {% if user.is_authenticated %}
                         <a href="" class="dropdown-toggle" data-toggle="dropdown">
                             <svg width="2em" height="1em" viewBox="0 0 16 16" class="bi bi-person" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                                 <path fill-rule="evenodd" d="M10 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm6 5c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
                             </svg>
                         </a>
                         <ul class="dropdown-menu">
-                        <li><a href="">More</a></li>
-                        <li><a href="">More</a></li>
-                        <li><a href="">More</a></li>
-                        <li><a href="">More</a></li>
-                        <li><a href="">More</a></li>
+                            
+                                <li><a href="{% url 'profile:profile' username=request.user %}">Profile</a></li>
+                                <li><a href="{% url 'account_logout' %}">Logout</a></li>
+                            
+                        
                         </ul>
+                        {% else %}
+                        <a href="{% url 'account_login' %}">
+                            <svg width="2em" height="1em" viewBox="0 0 16 16" class="bi bi-person" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M10 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm6 5c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                            </svg>
+                        </a>                                                    
+                        {% endif %}
                     </li>
                     </ul>
                     </nav>
@@ -74,68 +82,54 @@
                         
                         <!-- main col right -->
                         <div class="col-sm-7">  
-                            {% for post in all_posts %}   
-                            
-                            {% if post.user in following.following.all %}      
-                                {% if not post.image %}
-                                <div class="panel panel-default">
-                                    <div class="panel-heading"><a href="#" class="pull-right">View all</a> <h4>Stackoverflow</h4></div>
-                                    <div class="panel-body">
-                                        <img src="{% static 'img/150x150.gif' %}" class="img-circle pull-right"> <a href="#">Keyword: Bootstrap</a>
-                                        <div class="clearfix"></div>
-                                        <hr>
-                                        
-                                        <p>If you're looking for help with Bootstrap code, the <code>twitter-bootstrap</code> tag at <a href="http://stackoverflow.com/questions/tagged/twitter-bootstrap">Stackoverflow</a> is a good place to find answers.</p>
-                                        
-                                        <hr>
-                                        <form>
-                                        <div class="input-group">
-                                        <div class="input-group-btn">
-                                        <button class="btn btn-default">+1</button><button class="btn btn-default"><i class="glyphicon glyphicon-share"></i></button>
-                                        </div>
-                                        <input class="form-control" placeholder="Add a comment.." type="text">
-                                        </div>
-                                        </form>
-                                        
-                                    </div>
-                                </div>
-                                {% else %}
-                                
-                                <div class="panel panel-default">
-                                    <p class="lead" style="margin: 10px;">
-                                        {% if post.user.profile_pic %}
-                                            <img src="{{ post.user.profile_pic.url }}" width="30px" class="circlehome-dp" alt="signuplogo ">
-                                        {% else %}                                    
-                                        <img src="{% static 'img/user.png' %}" width="30px"> 
-                                        {% endif %}          
-                                                                
-                                        <a href="{% url 'profile:profile' username=post.user %}">{{post.user}}</a>
-                                    </p>
-                                    <div class="panel-thumbnail"><img src="{{ post.image.url }}" class="img-responsive"></div>
-                                    <div class="panel-body">
-                                    
-                                    <p>
-                                        <!-- 5 <a href="">Likes</a>, -->
-                                        <a href="{% url 'comment:comment' post=post.slug %}"> {{ post.slug |get_comment_total }}  Comments</a>
-                                    </p>
-                                    <hr>
-                                 
-                                        <form method="POST">
-                                            {% csrf_token %}
-                                            <div class="input-group">     
-                                            <input type="text" value="{{post}}" name="post" style="display: none;">                               
-                                            <input class="form-control" name="description" placeholder="Add a comment.." type="text">
-                                            <div class="input-group-btn">                                            
-                                                <button class="btn btn-default" type="submit" id="comment">Add Comment</button>                                               
+                            {% for post in all_posts %}  
+                                                           
+                                {% if request.user.profile in post.user.block.blocked.all %}
+                                    {% else %}
+                                    {% if post.user in following.following.all %}      
+                                                                        
+                                        <div class="panel panel-default">
+                                            <p class="lead" style="margin: 10px;">
+                                                {% if post.user.profile_pic %}
+                                                    <img src="{{ post.user.profile_pic.url }}" width="30px" class="circlehome-dp" alt="signuplogo ">
+                                                {% else %}                                    
+                                                <img src="{% static 'img/user.png' %}" width="30px"> 
+                                                {% endif %}          
+                                                                        
+                                                <a href="{% url 'profile:profile' username=post.user %}">{{post.user}}</a>
+                                            </p>
+                                            <div class="panel-thumbnail">
+                                                {% if post.image %}
+                                                <img src="{{ post.image.url }}" class="img-responsive">
+                                                {% else %}
+                                                <textarea class="form-control" disabled style="font-size:large;">{{post.description}}</textarea>
+                    
+                                                {% endif %}
                                             </div>
+                                            <div class="panel-body">
+                                            
+                                            <p>
+                                                <!-- 5 <a href="">Likes</a>, -->
+                                                <a href="{% url 'comment:comment' post=post.slug %}"> {{ post.slug |get_comment_total }}  Comments</a>
+                                            </p>
+                                            <hr>
+                                        
+                                                <form method="POST">
+                                                    {% csrf_token %}
+                                                    <div class="input-group">     
+                                                    <input type="text" value="{{post}}" name="post" style="display: none;">                               
+                                                    <input class="form-control" name="description" placeholder="Add a comment.." type="text">
+                                                    <div class="input-group-btn">                                            
+                                                        <button class="btn btn-default" type="submit" id="comment">Add Comment</button>                                               
+                                                    </div>
+                                                    </div>
+                                                </form>
+                                                <br />
+                                            
                                             </div>
-                                        </form>
-                                        <br />
-                                    
-                                    </div>
-                                    
-                                </div>
-                                {% endif %}
+                                            
+                                        </div>
+                                    {% endif %}
                                 {% endif %}
                             {% endfor %}
                             
@@ -166,7 +160,7 @@
                                     
                                
                                 </div>
-                                <div class="panel-heading"><a href="#" class="pull-right">View all</a> <h4>All Users</h4></div>
+                                <div class="panel-heading"><a href="#" class="pull-right"></a> <h4>All Users</h4></div>
                                 <div class="panel-body">
                                     <div class="list-group">
                                         

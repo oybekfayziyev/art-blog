@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+
+{% block extra_head %}
+
+
+<script>
+    function onFileSelected() {
+        console.log('ASD')
+        const preview = document.getElementById('myimg');
+        const file = document.querySelector('input[type=file]').files[0];
+        const reader = new FileReader();
+        console.log('first',preview.src)
+        reader.addEventListener("load", function () {
+            // convert image file to base64 string
+            preview.src = reader.result;
+        }, false);
+
+        if (file) {
+            reader.readAsDataURL(file);            
+        }
+        description = document.getElementById("description");
+     
+        description.required = false;
+
+    }
+    
+</script>
+
+<style>
+body{margin-top:20px; background-color: #eeeeee;}
+
+.well-social-post {
+    border-radius: 0;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    padding:0;
+}
+
+.well-social-post .glyphicon,
+.well-social-post .fa,
+.well-social-post [class^='icon-'],
+.well-social-post [class*='icon-'] {
+    font-weight: bold;
+    color: #999999;
+}
+
+.well-social-post a,
+.well-social-post a:hover,
+.well-social-post a:active,
+.well-social-post a:focus {
+    text-decoration: none;
+}
+
+.well-social-post .list-inline {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.well-social-post .list-inline li {
+    position: relative;
+}
+
+.well-social-post .list-inline li.active::after {
+    position: absolute;
+    display: block;
+    width: 0;
+    height: 0;
+    content: "";
+    top: 30px;
+    left: 50%;
+    left: -webkit-calc(50% - 5px);
+    left: -moz-calc(50%-5px);
+    left: calc(50% - 5px);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #dddddd;
+}
+
+.well-social-post .list-inline li.active a {
+    color: #222222;
+    font-weight: bold;
+}
+
+.well-social-post .form-control {
+    width: 100%;
+    min-height: 100px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.well-social-post .list-inline {
+    padding: 10px;
+}
+
+.well-social-post .list-inline li + li {
+    margin-left: 10px;
+}
+
+.well-social-post .post-actions {
+    margin: 0;
+    background-color: #f6f7f8;
+    border-top-color: #e9eaed;
+}                                                            
+</style>
+<!-- 
+<script>
+    $(function(){
+    var postActions   = $( '#list_PostActions' );
+    var currentAction = $( '#list_PostActions li.active' );
+    if ( currentAction.length === 0 ) {
+        postActions.find( 'li:first' ).addClass( 'active' );
+    }
+    postActions.find( 'li' ).on( 'click', function( e ) {
+        e.preventDefault();
+        var self = $( this );
+        if ( self === currentAction ) {return;}
+        // else
+        currentAction.removeClass( 'active' );
+        self.addClass( 'active' );
+        currentAction = self;
+    });
+})
+</script> -->
+{% endblock %}
+{% block content %}
+
+<div class="container bootstrap snippets bootdey">
+    <br/>
+        <br/>
+        <br/>
+    <div class="row">
+        <div class="col-md-offset-3 col-md-6 col-xs-12">
+            <div class="well well-sm well-social-post">
+                <img src="#" id="myimg" width="140px" alt="">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <ul class="list-inline" id='list_PostActions'>
+                <li class='active'><a href='#'>Add Post</a></li>               
+            </ul>
+            <textarea class="form-control" id="description" name="description" placeholder="What's in your mind?" required></textarea>
+            <ul class='list-inline post-actions'>
+                <li><a href="#">
+                    <input type="file" id="photo" name="photo" onchange="onFileSelected()" accept="image/*">
+                    <!-- <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-camera-fill" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                        <path fill-rule="evenodd" d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 1 3.172 4H2zm.5 2a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z"/>
+                      </svg> -->
+                    </a>
+                </li>
+                <!-- <li><a href="#" class='glyphicon glyphicon-user'></a></li>
+                <li><a href="#" class='glyphicon glyphicon-map-marker'></a></li> -->
+                <li class='pull-right'>
+                    <button class="btn btn-primary btn-xs">Post</button>
+                </li>
+            </ul>
+        </form>
+            </div>
+        </div>
+    </div>
+</div>      
+
+{% endblock %}
+

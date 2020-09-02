@@ -3,8 +3,9 @@ from django.contrib.auth.models import User
 from profiles.models import Profile
 from django.shortcuts import reverse
 from project.utils.utils import upload_directory_path, generate_slug
-
+from django.utils import timezone
 from django.db.models.signals import pre_save
+from PIL import Image
 # Create your models here.
 
 class PostExtraImage(models.Model):
@@ -14,13 +15,13 @@ class PostExtraImage(models.Model):
 
 	class Meta:
 		verbose_name_plural = 'Images'
-        
+                    
 class Post(models.Model):
 
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name = 'post')
     image = models.ImageField(upload_to=upload_directory_path, blank=True, null=True)
     content = models.CharField(max_length=512, blank=True, null=True)
-    description = models.CharField(max_length=512,blank=True,null=True)
+    description = models.TextField(max_length=512,blank=True,null=True)
     slug = models.SlugField(unique=True, default = generate_slug, blank=True,null=True)
     caption = models.CharField(max_length=512,blank=True,null=True)
     image_likes = models.ManyToManyField(Profile, related_name='likes',blank=True)
@@ -34,5 +35,24 @@ class Post(models.Model):
         return reverse("profile:user", kwargs={
             'username' : self.user.username
         })
+    
+    def create(self, instance, user, photo, description):
+        
+        obj = instance.objects.create(
+            user = user,                            
+            description = description,
+            created_date = timezone.now()
+        )
+
+        if photo:            
+            photo = upload_directory_path(obj, photo) 
+            obj.image = photo
+            obj.save()
+                    
+        # obj.image = ImageFile(photo)
+        # obj.save()
+
+       
+
   
 

@@ -62,3 +62,12 @@ def get_object_by_post(instance, post):
 
 def get_all_objects(instance):
     return instance.objects.all()
+
+def is_blocked(profile, block):
+    try:
+        if profile in block.blocked.all():
+            return False
+    except AttributeError:
+        pass
+
+    return True

@@ -1,4 +1,5 @@
 {% load static %}
+{% load template_tags %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 <script src="{% static 'js/profile.js' %}"></script>
 <header>
@@ -11,7 +12,7 @@
 				{% if profile.profile_pic %}
 				<img src="{{ profile.profile_pic.url }}" width="200px" height="200px" alt="">
 				{% else %}
-				<img src="{% static 'images/user.jpg' %}" width="200px" height="200px">
+				<img src="{% static 'img/user.png' %}" width="200px" height="200px">
 				{% endif %}
 			</div>
       
@@ -27,8 +28,8 @@
 			{{following.user.user.following.count}}
 			<div class="profile-stats">        
 				<ul>
-					<li><span class="profile-stat-count">{{ profile.post.count }}</span> posts</li>
-					<a href="{% url 'follow:followers' username=profile.user.username %}"><li style="padding: 5px;"><span class="profile-stat-count"> {{profile.followers.count }}</span> followers</li></a>
+					<li><span class="profile-stat-count">{{ profile.post.count }}</span> posts</li>					 
+					<a href="{% url 'follow:followers' username=profile.user.username %}"><li style="padding: 5px;"><span class="profile-stat-count"> {{followers }}</span> followers</li></a>
 					<a href="{% url 'follow:followings' username=profile.user.username %}"><li><span class="profile-stat-count">{{ following }}</span> following</li></a>
 				</ul>
 			</div>
@@ -55,9 +56,10 @@
 
     
 		<div class="gallery">
-      		{% for post in posts %}
-			<div class="gallery-item" tabindex="0">
-        <img src="{{ post.image.url }}" width="285px" height = "435px" class="gallery-images">        
+			{% for post in posts %}
+			{% if post.image %}  
+			<div class="gallery-item" tabindex="0">				
+        	<img src="{{ post.image.url }}" width="285px" height = "435px" class="gallery-images">        
 
 				<div class="gallery-item-info">
 					<ul>
@@ -65,10 +67,18 @@
 						<svg width="1em" height="0.8em" viewBox="0 0 20 16" class="bi bi-heart" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
 						<path fill-rule="evenodd" d="M8 2.748l-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
 						</svg> {{ post.image_likes.count}}</li><i class="fa fa-comments" aria-hidden="true"></i>
-						<li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i class="fas fa-comment" aria-hidden="true"></i> 2</li>
+						<li class="gallery-item-comments"><span class="visually-hidden">Comments:</span>
+							<i class="fas fa-comment" aria-hidden="true"></i>
+							{{ post.slug |get_comment_total }}
+						</li>
 					</ul>
 				</div>
-      </div>
+			</div>
+			{% else %}
+			<textarea class="form-control" disabled style="font-size:large;">{{post.description}}</textarea>
+			
+			{% endif %}
+      
       {% endfor %}      	
 		</div>
 		<!-- End of gallery -->

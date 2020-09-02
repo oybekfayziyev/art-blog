@@ -77,3 +77,40 @@ class Following(models.Model):
             instance.delete()
       
         return instance
+
+class Blockuser(models.Model):
+    user = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name = 'block')
+    blocked = models.ManyToManyField(Profile, related_name='blocked')
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.user.user.username
+    
+    def update(self,instance,user):
+        
+        instance.updated_date = timezone.now()
+        instance.blocked.add(user)     
+        instance.save()
+       
+        return instance
+
+    def create(self,instance,blocker, user):
+        
+        block_obj = instance.objects.create(
+            user = blocker,
+            created_date = timezone.now()
+        )        
+       
+        block_obj.blocked.add(user)        
+        return block_obj
+
+    def remove(self, instance,user):
+    
+        instance.blocked.remove(user)        
+        instance.save()
+
+        if not instance.blocked.all():
+            instance.delete()
+      
+        return instance

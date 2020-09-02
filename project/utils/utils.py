@@ -18,6 +18,7 @@ def upload_directory_path(instance,filename):
     filename = "{new_file_name}{ext}".format(new_file_name=new_file,ext=ext)
 
     class_name = get_class_name(instance)
+    print('class name',class_name)
     
     if class_name == 'PostExtraImage':
 
@@ -33,7 +34,8 @@ def upload_directory_path(instance,filename):
     elif class_name == "Profile":
 
         folder_name = 'profile'
-        
+    
+            
     return "{folder_name}/{username}/{new_filename}/{filename}".format(
         folder_name=folder_name, username = instance.user, new_filename=new_file, filename=filename
     )

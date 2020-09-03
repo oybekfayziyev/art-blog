@@ -15,6 +15,7 @@ class Follower(models.Model):
     def update(self, instance, follower):
       
         instance.updated_date = timezone.now()
+        print('update follower',follower)
         instance.followers.add(follower)        
         instance.save()
 

@@ -103,6 +103,7 @@ def follow_unfollow_user(request, username, follow):
     else:
         profile_follow, profile = get_queryset(username, follow)
         Following().create(Following, profile, profile_follow)
+        print('follower',follower)
         if follower:
             follower.update(follower, following)
         else:

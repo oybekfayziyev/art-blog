@@ -59,9 +59,9 @@ SITE_ID = 1
 AUTHENTICATION_BACKENDS = [
      
     'django.contrib.auth.backends.ModelBackend',
-
     # `allauth` specific authentication methods, such as login by e-mail
-    'allauth.account.auth_backends.AuthenticationBackend',
+    # 'allauth.account.auth_backends.AuthenticationBackend',
+    
    
 ]
 
@@ -152,7 +152,7 @@ LOGIN_REDIRECT_URL = '/'
 
 ACCOUNT_FORMS = {
     'login': 'profiles.forms.LoginForm',
-    'signup': 'profiles.forms.UserForm',    
+    'signup': 'profiles.forms.ProfileForm',    
 }
 
 

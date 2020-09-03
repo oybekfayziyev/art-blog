@@ -6,6 +6,7 @@ from project.utils.core import (get_object_by_username,
                     get_object_by_user,
                     is_blocked
                 )
+from django.contrib.auth import login, authenticate
 from django.views import View
 from profiles.models import Profile
 from post.models import Post
@@ -33,6 +34,7 @@ class ProfileView(View):
         context = {}
 
         profile, following, follower, block = self.get_queryset(request,*args, **kwargs)
+        
         blocked = is_blocked(request.user.profile, block)
         
         if blocked:
@@ -110,7 +112,7 @@ class EditProfile(LoginRequiredMixin,View):
     
     def post(self, request, *args, **kwargs):
 
-        profile = self.get_queryset()
+        profile, _ = self.get_queryset()
         
         default_image = profile.profile_pic
         current_username = profile.user.username
@@ -118,6 +120,7 @@ class EditProfile(LoginRequiredMixin,View):
        
         all_profiles = get_all_objects(Profile)
         user = User.objects.get(username=profile.user.username)
+
         if is_valid(form, all_profiles, current_username):
              
             profile.profile_pic = form['profile_pic']                
@@ -125,7 +128,8 @@ class EditProfile(LoginRequiredMixin,View):
             profile.first_name = form['fname']
             profile.last_name = form['lname']
             profile.bio = form['bio']
-            user.set_password(form['password'])
+            if form['password']:
+                user.set_password(form['password'])
             user.save()
             profile.save()
                        
@@ -153,57 +157,44 @@ class EditProfile(LoginRequiredMixin,View):
                 'password': password, 'confirm':confirm
             }
     
+  
+class MySignupView(View):    
 
-
-class MyLoginView(LoginView):
-    
-
-    def get_context_data(self, **kwargs):           
-        context = super(MyLoginView, self).get_context_data(**kwargs)
-        context['form'] = LoginForm() # add form to context
+    def get(self, request, *args, **kwargs):
+        form = ProfileForm() 
         
-        print(context)
-        return context
+        return render(request, "blog/signup.html", {
+            'form' : form
+        })
+
+    def post(self, request, *args, **kwargs):
+        form = ProfileForm(request.POST)
+        
+        if form.is_valid():
+          
+            form.save()
+            username = form.cleaned_data.get('username')
+            username_obj = User.objects.get(username=username)
+            username = username_obj.username
+            raw_password = username_obj.password
+            first_name = username_obj.first_name
+            last_name = username_obj.last_name
+
+            user = authenticate(username=username, password=raw_password)
+            profile = Profile(
+                user = username_obj,
+                first_name = first_name,
+                last_name=last_name,
+                created_date = timezone.now()
+            )
+            profile.save()
+            login(request, username_obj)
+            return redirect('/')
+
+        else:         
+            messages.info(request, "Error occured in signup page. ")
+            form = ProfileForm()
+        return render(request, 'blog/signup.html', {'form': form})        
+
     
-    # def form_valid(self, form):
-    #     # By assigning the User to a property on the view, we allow subclasses
-    #     # of SignupView to access the newly created User instance
-    #     print('retaurant',self.restaurant_form)   
-    #     print('retaurant',form)   
-    #     self.restaurant_form = form.save(self.request)   
-    #     print('retaurant',self.restaurant_form)      
-    #     return complete_signup(
-    #         self.request, self.user,
-    #         app_settings.EMAIL_VERIFICATION,
-    #         self.get_success_url())
-    
-class MySignupView(SignupView):    
-
-    def get_context_data(self, **kwargs):           
-        context = super(MySignupView, self).get_context_data(**kwargs)
-         
-        context['form'] = UserForm() # add form to context
-        context['profile_form'] = ProfileForm()
-
-        print('kwargs')
-        print(' dxxxx',context)
-        return context
-    
-    def form_valid(self, form, profile_form):
-        # By assigning the User to a property on the view, we allow subclasses
-        # of SignupView to access the newly created User instance
-        self.user = form.save(self.request)
-
-        print('form')
-        print('profile form')
-
-
-        try:
-            return complete_signup(
-                self.request, self.user,
-                app_settings.EMAIL_VERIFICATION,
-                self.get_success_url())
-        except ImmediateHttpResponse as e:
-            return e.response
-
    
